@@ -1,0 +1,1975 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperTracker | Advanced Trac Network Token Monitor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Barre de titre Pear native */
+        #titlebar {
+            -webkit-app-region: drag;
+            height: 30px;
+            width: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a1a1a 100%);
+            border-bottom: 1px solid #333;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+        }
+
+        pear-ctrl[data-platform="darwin"] {
+            order: -1;
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .titlebar-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            -webkit-app-region: no-drag;
+            order: 1;
+        }
+
+        pear-ctrl[data-platform="darwin"]~.titlebar-title {
+            margin-left: 80px;
+        }
+
+        pear-ctrl:not([data-platform="darwin"]) {
+            order: 2;
+        }
+
+        .titlebar-logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+        }
+
+        .app-container {
+            padding-top: 30px;
+            height: calc(100vh - 30px);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a1a1a 100%);
+            border-bottom: 1px solid #333;
+            padding: 20px 0;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.error {
+            background: #ef4444;
+        }
+
+        .status-dot.warning {
+            background: #f59e0b;
+        }
+
+        .status-dot.success {
+            background: #4ade80;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            position: relative;
+        }
+
+        .nav-tab:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-tab.active {
+            color: #ff6b5b;
+            border-bottom-color: #ff6b5b;
+            background: rgba(255, 107, 91, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: #ff6b5b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 91, 0.15);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .hot-section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .hot-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #4ade80;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 1.5s infinite;
+        }
+
+        .search-controls {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #ff6b5b;
+            box-shadow: 0 0 0 3px rgba(255, 107, 91, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #555;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #333;
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        .filter-btn.active {
+            background: #ff6b5b;
+            border-color: #ff6b5b;
+            color: #fff;
+        }
+
+        .tokens-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .token-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .token-card:hover {
+            border-color: #555;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .token-card.hot {
+            border-color: #ff6b5b;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a1a1a 100%);
+        }
+
+        .token-card.hot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6b5b, #ff8a5b);
+        }
+
+        .token-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .token-ticker {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            font-variant: small-caps;
+        }
+
+        .token-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-live {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-active {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .status-pending {
+            background: rgba(107, 114, 128, 0.2);
+            color: #6b7280;
+            border: 1px solid rgba(107, 114, 128, 0.3);
+        }
+
+        .progress-container {
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 3px;
+            transition: width 0.8s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #888;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .token-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .hot-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(45deg, #ff6b5b, #ff8a5b);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top: 3px solid #ff6b5b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #ef4444;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff6b5b, #ff8a5b);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 107, 91, 0.4);
+        }
+
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+            border: 1px solid #444;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+            border-color: #555;
+        }
+
+        .notification {
+            position: fixed;
+            top: 40px;
+            right: 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px 20px;
+            max-width: 400px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+
+        .notification.error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .notification.info {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .notification.warning {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination-btn {
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover {
+            background: #444;
+        }
+
+        .pagination-btn.active {
+            background: #ff6b5b;
+            border-color: #ff6b5b;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 30px 30px 20px 30px;
+            border-bottom: 1px solid #333;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #555;
+        }
+
+        .modal-token-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .modal-badges {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-live {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge-hot {
+            background: rgba(249, 115, 22, 0.2);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        .badge-completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 0;
+        }
+
+        .modal-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .modal-tab:hover {
+            color: #fff;
+        }
+
+        .modal-tab.active {
+            color: #ff6b5b;
+            border-bottom-color: #ff6b5b;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .progress-section {
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .progress-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .large-progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .large-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 6px;
+            transition: width 0.8s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            color: #888;
+        }
+
+        .progress-percentage {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .stats-grid-modal {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card-modal {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number-modal {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-number-modal.highlight {
+            color: #4ade80;
+        }
+
+        .stat-number-modal.warning {
+            color: #f59e0b;
+        }
+
+        .stat-label-modal {
+            font-size: 14px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .deployment-info {
+            background: #0a0a0a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .deployment-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-size: 14px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #fff;
+            font-family: monospace;
+            word-break: break-all;
+            max-width: 60%;
+            text-align: right;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .btn-copy {
+            background: #444;
+            color: #fff;
+            border: 1px solid #555;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            background: #555;
+        }
+
+        .btn-close {
+            background: #ff6b5b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            background: #ff5a4a;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid-modal {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barre de titre Pear native -->
+    <div id="titlebar">
+        <pear-ctrl></pear-ctrl>
+        <div class="titlebar-title">
+            <img src="./assets/images/logo-h-3d.png" alt="HyperTracker" class="titlebar-logo">
+            HyperTracker
+        </div>
+    </div>
+
+    <!-- Conteneur principal -->
+    <div class="app-container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <img id="logo-img" src="assets/images/logo-hypertracker1.png" alt="HyperTracker"
+                        style="height: 100px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                </div>
+                <div class="header-status">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="connection-status">Initializing HyperTracker...</span>
+                    <button class="btn btn-secondary" onclick="refreshData()">REFRESH</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-section="overview">Overview</button>
+                <button class="nav-tab" data-section="hot">🔥 Hot Mints</button>
+                <button class="nav-tab" data-section="completed">✅ Completed</button>
+                <button class="nav-tab" data-section="all">All Tokens</button>
+                <button class="nav-tab" data-section="system">📊 System</button>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats chargées ici -->
+            </div>
+
+            <div class="hot-section" id="hotSection">
+                <div class="section-header">
+                    <div class="section-title">
+                        🔥 <span>Active Mints</span>
+                    </div>
+                    <div class="hot-indicator">
+                        <div class="live-dot"></div>
+                        <span>Live Data</span>
+                    </div>
+                </div>
+                <div id="hotTokensGrid" class="tokens-grid">
+                    <!-- Tokens chauds chargés ici -->
+                </div>
+            </div>
+
+            <div class="search-controls">
+                <input type="text" class="search-input" placeholder="Search tokens (e.g. bitcoin, gem)..."
+                    id="searchInput">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="hot">🔥 Hot</button>
+                    <button class="filter-btn" data-filter="completed">✅ Completed</button>
+                    <button class="filter-btn" data-filter="active">⚡ Active</button>
+                </div>
+            </div>
+
+            <div id="content">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div id="loading-message">Initializing HyperTracker Engine...</div>
+                    <div id="loading-details" style="margin-top: 10px; font-size: 14px; color: #666;">Starting advanced
+                        monitoring engine...</div>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination" style="display: none;">
+                <button class="pagination-btn" id="prevBtn" onclick="changePage(-1)">← Prev</button>
+                <span id="pageInfo" style="color: #888; margin: 0 15px;"></span>
+                <button class="pagination-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour détails des tokens -->
+    <div class="modal-overlay" id="tokenModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeTokenModal()">×</button>
+                <div class="modal-token-title" id="modalTokenTitle">TOKEN</div>
+                <div class="modal-badges" id="modalBadges">
+                    <!-- Badges ajoutés dynamiquement -->
+                </div>
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="overview">Overview</button>
+                    <button class="modal-tab" data-tab="technical">Technical</button>
+                    <button class="modal-tab" data-tab="analytics">Analytics</button>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="tab-content active" id="overviewTab">
+                    <div class="progress-section">
+                        <div class="progress-title">Minting Progress</div>
+                        <div class="large-progress-bar">
+                            <div class="large-progress-fill" id="modalProgressFill"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span class="progress-percentage" id="modalProgressText">0%</span>
+                            <span id="modalProgressAmount">0 / 0 minted</span>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid-modal">
+                        <div class="stat-card-modal">
+                            <div class="stat-number-modal" id="modalTotalSupply">0</div>
+                            <div class="stat-label-modal">Total Supply</div>
+                        </div>
+                        <div class="stat-card-modal">
+                            <div class="stat-number-modal highlight" id="modalCirculating">0</div>
+                            <div class="stat-label-modal">Circulating</div>
+                        </div>
+                        <div class="stat-card-modal">
+                            <div class="stat-number-modal warning" id="modalRemaining">0</div>
+                            <div class="stat-label-modal">Remaining</div>
+                        </div>
+                        <div class="stat-card-modal">
+                            <div class="stat-number-modal" id="modalHolders">0</div>
+                            <div class="stat-label-modal">Holders</div>
+                        </div>
+                    </div>
+
+                    <div class="deployment-info">
+                        <div class="deployment-title">Deployment Info</div>
+                        <div class="info-row">
+                            <span class="info-label">Deployer</span>
+                            <span class="info-value" id="modalDeployer">N/A</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Mint Limit</span>
+                            <span class="info-value" id="modalMintLimit">N/A</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Decimals</span>
+                            <span class="info-value" id="modalDecimals">18</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Last Update</span>
+                            <span class="info-value" id="modalLastUpdate">N/A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="technicalTab">
+                    <div class="deployment-info">
+                        <div class="deployment-title">Technical Details</div>
+                        <div class="info-row">
+                            <span class="info-label">Ticker</span>
+                            <span class="info-value" id="modalTicker">token</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Max Supply</span>
+                            <span class="info-value" id="modalMaxSupply">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Current Supply</span>
+                            <span class="info-value" id="modalCurrentSupply">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Progress</span>
+                            <span class="info-value" id="modalProgressPercent">0%</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status</span>
+                            <span class="info-value" id="modalStatus">Active</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Discovery Method</span>
+                            <span class="info-value" id="modalDiscovery">N/A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="analyticsTab">
+                    <div class="deployment-info">
+                        <div class="deployment-title">Analytics & Activity</div>
+                        <div class="info-row">
+                            <span class="info-label">Completion Rate</span>
+                            <span class="info-value" id="modalCompletionRate">0%</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Total Holders</span>
+                            <span class="info-value" id="modalTotalHolders">0</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Network Activity</span>
+                            <span class="info-value">Live on Trac Network</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Engine Status</span>
+                            <span class="info-value">⚡ Active Monitoring</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-copy" onclick="copyTokenInfo()">📋 Copy Token Info</button>
+                <button class="btn-close" onclick="closeTokenModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // ======================================
+        // HYPERTRACKER - VERSION CORRIGÉE COMPLETE AVEC MODAL
+        // ======================================
+
+        console.log('🚀 HyperTracker starting...');
+
+        class HyperTrackerApp {
+            constructor() {
+                console.log('🎯 DOM loaded - Starting HyperTracker...');
+
+                // État de l'application
+                this.allTokens = [];
+                this.hotTokens = [];
+                this.filteredTokens = [];
+                this.systemStats = {};
+                this.currentFilter = 'all';
+                this.currentSection = 'overview';
+                this.currentPage = 1;
+                this.tokensPerPage = 20;
+                this.searchQuery = '';
+                this.connectionStatus = 'initializing';
+
+                // Monitoring Engine
+                this.monitoringEngine = null;
+                this.engineStatus = 'initializing';
+                this.engineTimeout = null;
+
+                this.init();
+            }
+
+            async init() {
+                this.setupEventListeners();
+                await this.initializeMonitoringEngine();
+            }
+
+            async initializeMonitoringEngine() {
+                try {
+                    console.log('🔧 DEBUG: Starting initializeMonitoringEngine...');
+                    this.showNotification('Initializing HyperTracker monitoring engine...', 'info');
+
+                    // Import monitoring engine
+                    const { HyperTrackerMonitoringEngine } = await import('./src/monitoring-engine.js');
+                    console.log('✅ Engine class imported successfully');
+
+                    // Create and start engine
+                    this.monitoringEngine = new HyperTrackerMonitoringEngine();
+                    console.log('✅ Engine instance created');
+
+                    // Start engine
+                    console.log('🚀 Starting monitoring engine...');
+                    await this.monitoringEngine.start('store1');
+
+                    // 🎯 CORRECTIONS AUTOMATIQUES INTÉGRÉES
+                    console.log('🔧 Applying automatic sync corrections...');
+
+                    // Attendre que l'engine soit vraiment prêt
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Synchroniser les données automatiquement
+                    this.allTokens = this.monitoringEngine.getTokens();
+                    console.log(`✅ Auto-synced ${this.allTokens.length} tokens`);
+
+                    // Calculer les stats système automatiquement
+                    this.systemStats = {
+                        totalTokens: this.monitoringEngine.database.tokens.size,
+                        totalHolders: this.getTotalHoldersFromEngine() || 0,
+                        totalBalances: this.monitoringEngine.database.balances.size,
+                        completedTokens: this.allTokens.filter(t => t.progress >= 100).length,
+                        hotTokens: this.allTokens.filter(t => t.progress > 1 && t.progress < 95).length
+                    };
+
+                    // Mettre à jour les statuts
+                    this.engineReady = true;
+                    this.engineStatus = 'active';
+
+                    // Forcer l'affichage
+                    this.displayStats();
+
+                    // 🧹 OPTIMISATION LOCALSTORAGE AUTOMATIQUE
+                    console.log('🧹 Setting up localStorage optimization...');
+
+                    // Désactiver la sauvegarde automatique trop fréquente
+                    if (this.monitoringEngine.saveInterval) {
+                        clearInterval(this.monitoringEngine.saveInterval);
+                        console.log('✅ Auto-save disabled to prevent quota errors');
+                    }
+
+                    // Nettoyage automatique toutes les 5 minutes
+                    setInterval(() => {
+                        Object.keys(localStorage).forEach(key => {
+                            if (key.startsWith('hypertracker_checkpoint_') && key !== 'hypertracker_checkpoint') {
+                                localStorage.removeItem(key);
+                            }
+                        });
+                        console.log('🧹 Old checkpoints cleaned automatically');
+                    }, 300000);
+
+                    // Finaliser
+                    this.finalizeLoading();
+
+                    console.log('✅ HyperTracker Engine initialized with automatic corrections!');
+                    this.updateConnectionStatus('⚡ HyperTracker Engine active', 'success');
+
+                } catch (error) {
+                    console.error('❌ Failed to initialize monitoring engine:', error);
+                    this.handleEngineError(error);
+                }
+            }
+
+            // NOUVELLE MÉTHODE : Mises à jour périodiques
+            startPeriodicUpdates() {
+                // Mise à jour immédiate
+                this.loadTokensFromEngine();
+
+                // Puis toutes les 5 secondes
+                this.updateInterval = setInterval(() => {
+                    if (this.engineReady && this.monitoringEngine) {
+                        this.loadTokensFromEngine();
+                    }
+                }, 5000);
+
+                console.log('🔄 Periodic updates started (every 5 seconds)');
+            }
+
+            // MODIFIER AUSSI loadTokensFromEngine pour être plus tolérant :
+            async loadTokensFromEngine() {
+                if (!this.monitoringEngine || !this.engineReady) {
+                    return;
+                }
+
+                try {
+                    // Utiliser des valeurs par défaut si l'engine n'est pas encore prêt
+                    const stats = this.monitoringEngine.getStats ? this.monitoringEngine.getStats() : {
+                        totalTokens: this.monitoringEngine.database?.tokens?.size || 0,
+                        totalHolders: this.getTotalHoldersFromEngine() || 0,
+                        totalBalances: this.monitoringEngine.database?.balances?.size || 0,
+                        isLive: this.monitoringEngine.database?.stats?.isLive || false,
+                        status: this.monitoringEngine.database?.stats?.isLive ? '⚡ HyperTracker Engine active' : '🔄 Scanning blockchain...'
+                    };
+
+                    const tokens = this.monitoringEngine.getTokens ? this.monitoringEngine.getTokens() : [];
+
+                    this.tokens = tokens;
+                    this.stats = stats;
+
+                    this.updateStats();
+                    this.renderTokens();
+
+                    // Log progress
+                    if (stats.totalTokens > 0) {
+                        console.log(`📊 UI Updated: ${stats.totalTokens} tokens, ${stats.totalHolders} holders`);
+                    }
+
+                } catch (error) {
+                    console.error('❌ Error loading from engine:', error);
+                }
+            }
+
+            // Aide pour calculer les holders depuis l'engine
+            getTotalHoldersFromEngine() {
+                if (!this.monitoringEngine.database?.holders) return 0;
+
+                let total = 0;
+                for (const holders of this.monitoringEngine.database.holders.values()) {
+                    total += holders.size;
+                }
+                return total;
+            }
+
+            handleEngineTimeout() {
+                console.error('⏰ Engine startup timed out after 60 seconds');
+                this.updateConnectionStatus('⏰ Startup timeout - Network issues', 'error');
+                this.updateLoadingMessage('Connection Timeout', 'Unable to connect to Hypertokens network. Check your connection and restart.');
+                this.showNotification('⏰ Connection timeout - Please restart the app', 'error');
+                this.showOfflineMode();
+            }
+
+            handleEngineError(error) {
+                this.engineStatus = 'error';
+                this.updateConnectionStatus('❌ Engine failed to start', 'error');
+
+                if (error.message.includes('timeout')) {
+                    this.updateLoadingMessage('Connection Timeout', 'Network connection failed. Please check your internet and restart.');
+                } else {
+                    this.updateLoadingMessage('Engine Error', `Failed to start: ${error.message}`);
+                }
+
+                this.showNotification(`❌ Engine error: ${error.message}`, 'error');
+                this.showOfflineMode();
+            }
+
+            showOfflineMode() {
+                document.getElementById('content').innerHTML = `
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 30px; text-align: center;">
+                        <h3 style="color: #ef4444; margin-bottom: 15px;">🔌 Connection Failed</h3>
+                        <p style="color: #ccc; margin-bottom: 20px;">Unable to connect to Hypertokens network.</p>
+                        <div style="margin-bottom: 20px; color: #999; font-size: 14px; text-align: left;">
+                            <strong>Possible causes:</strong><br>
+                            • Network connectivity issues<br>
+                            • Bootstrap nodes unavailable<br>
+                            • Firewall blocking connections<br>
+                            • First-time sync taking longer than expected
+                        </div>
+                        <button class="btn btn-primary" onclick="location.reload()">🔄 Restart Application</button>
+                    </div>
+                `;
+
+                this.systemStats = { totalTokens: 0, totalHolders: 0, completedTokens: 0, hotTokens: 0 };
+                this.displayStats();
+            }
+
+            async loadTokensFromEngine() {
+                if (!this.monitoringEngine) {
+                    console.log('⚠️ No monitoring engine available');
+                    return;
+                }
+
+                try {
+                    console.log('📊 Loading tokens from monitoring engine...');
+
+                    // Récupérer les tokens depuis l'engine
+                    const engineTokens = this.monitoringEngine.getTokens();
+                    console.log(`✅ Loaded ${engineTokens.length} tokens from engine`);
+
+                    // Convertir au format attendu par l'interface
+                    this.allTokens = engineTokens.map(token => ({
+                        tick: token.ticker,
+                        max: token.supply || '0',
+                        minted: token.completed || '0',
+                        lim: token.amount || '0',
+                        dec: token.decimals || 18,
+                        progress: token.progress || 0,
+                        isCompleted: token.progress >= 100,
+                        addr: token.deployer || 'N/A',
+                        totalHolders: token.totalHolders || 0,
+                        lastUpdate: token.lastUpdate || Date.now(),
+                        discoveredVia: token.discoveredVia || 'deploy'
+                    }));
+
+                    console.log(`📊 Converted ${this.allTokens.length} tokens for interface`);
+
+                } catch (error) {
+                    console.error('❌ Error loading from engine:', error);
+                    this.showNotification('❌ Error loading tokens from engine', 'error');
+                }
+            }
+
+            finalizeLoading() {
+                console.log('🎯 Finalizing loading...');
+                this.updateStats();
+                this.updateHotTokens();
+                this.filterAndDisplayTokens();
+                this.showCurrentSection();
+
+                // Cacher le loading
+                document.getElementById('content').innerHTML = '';
+                this.displayTokens();
+            }
+
+            // ====================================
+            // MÉTHODES UI (CONSERVÉES DE VOTRE DESIGN)
+            // ====================================
+
+            setupEventListeners() {
+                // Navigation tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.showSection(tab.dataset.section);
+                    });
+                });
+
+                // Search input
+                const searchInput = document.getElementById('searchInput');
+                searchInput.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value.toLowerCase();
+                    this.filterAndDisplayTokens();
+                });
+
+                // Filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.setFilter(btn.dataset.filter);
+                    });
+                });
+            }
+
+            updateConnectionStatus(message, type = 'info') {
+                const statusEl = document.getElementById('connection-status');
+                const dotEl = document.getElementById('statusDot');
+
+                if (statusEl) statusEl.textContent = message;
+                if (dotEl) dotEl.className = `status-dot ${type}`;
+                this.connectionStatus = type;
+            }
+
+            updateLoadingMessage(main, details) {
+                const mainEl = document.getElementById('loading-message');
+                const detailsEl = document.getElementById('loading-details');
+
+                if (mainEl) mainEl.textContent = main;
+                if (detailsEl) detailsEl.textContent = details;
+            }
+
+            updateStats() {
+                this.systemStats = {
+                    totalTokens: this.allTokens.length,
+                    completedTokens: this.allTokens.filter(t => t.isCompleted).length,
+                    activeTokens: this.allTokens.filter(t => !t.isCompleted && t.progress > 0).length,
+                    hotTokens: this.allTokens.filter(t => t.progress > 1 && t.progress < 95).length,
+                    totalHolders: this.allTokens.reduce((sum, t) => sum + (t.totalHolders || 0), 0)
+                };
+
+                this.displayStats();
+            }
+
+            displayStats() {
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${this.systemStats.totalTokens || 0}</div>
+                        <div class="stat-label">Total Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${this.systemStats.totalHolders || 0}</div>
+                        <div class="stat-label">Total Holders</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${this.systemStats.completedTokens || 0}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${this.systemStats.hotTokens || 0}</div>
+                        <div class="stat-label">Hot Mints</div>
+                    </div>
+                `;
+            }
+
+            updateHotTokens() {
+                this.hotTokens = this.allTokens
+                    .filter(t => t.progress > 1 && t.progress < 95)
+                    .sort((a, b) => b.progress - a.progress)
+                    .slice(0, 8);
+
+                const hotGrid = document.getElementById('hotTokensGrid');
+
+                if (this.hotTokens.length === 0) {
+                    hotGrid.innerHTML = `
+                        <div class="loading" style="padding: 40px;">
+                            <div style="color: #666;">😴 No active mints at the moment</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const hotHtml = this.hotTokens.map(token => this.createTokenCard(token, true)).join('');
+                hotGrid.innerHTML = hotHtml;
+            }
+
+            filterAndDisplayTokens() {
+                let filtered = [...this.allTokens];
+
+                switch (this.currentFilter) {
+                    case 'hot':
+                        filtered = filtered.filter(t => t.progress > 1 && t.progress < 95);
+                        break;
+                    case 'completed':
+                        filtered = filtered.filter(t => t.isCompleted);
+                        break;
+                    case 'active':
+                        filtered = filtered.filter(t => !t.isCompleted && t.progress > 0);
+                        break;
+                }
+
+                if (this.searchQuery) {
+                    filtered = filtered.filter(t =>
+                        t.tick.toLowerCase().includes(this.searchQuery)
+                    );
+                }
+
+                this.filteredTokens = filtered;
+                this.updatePagination();
+                this.displayTokens();
+            }
+
+            updatePagination() {
+                const totalPages = Math.ceil(this.filteredTokens.length / this.tokensPerPage);
+                const pagination = document.getElementById('pagination');
+                const pageInfo = document.getElementById('pageInfo');
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+
+                if (totalPages <= 1) {
+                    pagination.style.display = 'none';
+                    return;
+                }
+
+                pagination.style.display = 'flex';
+                pageInfo.textContent = `Page ${this.currentPage} of ${totalPages} (${this.filteredTokens.length} tokens)`;
+
+                prevBtn.disabled = this.currentPage <= 1;
+                nextBtn.disabled = this.currentPage >= totalPages;
+            }
+
+            displayTokens() {
+                const startIndex = (this.currentPage - 1) * this.tokensPerPage;
+                const endIndex = startIndex + this.tokensPerPage;
+                const tokensToShow = this.filteredTokens.slice(startIndex, endIndex);
+
+                const tokensHtml = tokensToShow.map(token => this.createTokenCard(token)).join('');
+                document.getElementById('content').innerHTML = `
+                    <div class="tokens-grid">
+                        ${tokensHtml}
+                    </div>
+                `;
+            }
+
+            createTokenCard(token, isHot = false) {
+                const progress = Math.min(100, Math.max(0, token.progress || 0));
+                let status = 'pending';
+                let statusText = 'Pending';
+
+                if (token.isCompleted) {
+                    status = 'completed';
+                    statusText = 'Completed';
+                } else if (progress > 0) {
+                    status = 'active';
+                    statusText = 'Active';
+                }
+
+                if (isHot) {
+                    status = 'live';
+                    statusText = 'Live';
+                }
+
+                const hotClass = isHot ? 'hot' : '';
+                const hotBadge = isHot ? '<div class="hot-badge">🔥 LIVE MINT</div>' : '';
+
+                return `
+                    <div class="token-card ${hotClass}" onclick="app.showTokenDetails('${token.tick}')">
+                        ${hotBadge}
+                        <div class="token-header">
+                            <div class="token-ticker">${token.tick}</div>
+                            <div class="token-status status-${status}">${statusText}</div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>${progress.toFixed(2)}%</span>
+                                <span>${this.formatNumber(token.minted || '0')} / ${this.formatNumber(token.max || '0')}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="token-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Max Supply</div>
+                                <div class="detail-value">${this.formatNumber(token.max || '0')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Holders</div>
+                                <div class="detail-value">${token.totalHolders || 0}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Mint Limit</div>
+                                <div class="detail-value">${this.formatNumber(token.lim || '0')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Progress</div>
+                                <div class="detail-value">${progress.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            showSection(section) {
+                this.currentSection = section;
+                this.currentPage = 1;
+
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    if (tab.dataset.section === section) {
+                        tab.classList.add('active');
+                    }
+                });
+
+                this.showCurrentSection();
+            }
+
+            showCurrentSection() {
+                const hotSection = document.getElementById('hotSection');
+
+                switch (this.currentSection) {
+                    case 'overview':
+                        hotSection.style.display = 'block';
+                        this.setFilter('all');
+                        break;
+                    case 'hot':
+                        hotSection.style.display = 'none';
+                        this.setFilter('hot');
+                        break;
+                    case 'completed':
+                        hotSection.style.display = 'none';
+                        this.setFilter('completed');
+                        break;
+                    case 'all':
+                        hotSection.style.display = 'none';
+                        this.setFilter('all');
+                        break;
+                    case 'system':
+                        hotSection.style.display = 'none';
+                        this.showSystemStats();
+                        break;
+                }
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+                this.currentPage = 1;
+
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.filter === filter) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                if (this.currentSection !== 'system') {
+                    this.filterAndDisplayTokens();
+                }
+            }
+
+            changePage(direction) {
+                const totalPages = Math.ceil(this.filteredTokens.length / this.tokensPerPage);
+                const newPage = this.currentPage + direction;
+
+                if (newPage >= 1 && newPage <= totalPages) {
+                    this.currentPage = newPage;
+                    this.displayTokens();
+                    this.updatePagination();
+                }
+            }
+
+            showSystemStats() {
+                const engineStats = this.monitoringEngine ? this.monitoringEngine.getStats() : {};
+
+                document.getElementById('content').innerHTML = `
+                    <div style="background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 30px;">
+                        <h2 style="margin-bottom: 20px; color: #fff;">⚡ HyperTracker System</h2>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                            <div class="stat-card">
+                                <div class="stat-number">${this.systemStats.totalTokens}</div>
+                                <div class="stat-label">Total Tokens</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${engineStats.totalHolders || 0}</div>
+                                <div class="stat-label">Total Holders</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${engineStats.totalBalances || 0}</div>
+                                <div class="stat-label">Tracked Balances</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${this.engineStatus}</div>
+                                <div class="stat-label">Engine Status</div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 20px; background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 10px; margin-bottom: 20px;">
+                            <h3 style="margin-bottom: 15px; color: #4ade80;">⚡ HyperTracker Engine ${this.engineStatus === 'active' ? 'Active' : 'Status'}</h3>
+                            <div style="color: #ccc; font-size: 14px; line-height: 1.8;">
+                                <strong>🚀 Advanced monitoring engine:</strong><br><br>
+                                • Real-time token discovery and tracking<br>
+                                • Complete holder and balance monitoring<br>
+                                • Intelligent checkpoint system<br>
+                                • ${this.systemStats.totalTokens || 0} tokens with ${this.systemStats.totalHolders || 0} holders tracked<br>
+                                • Engine Status: ${this.engineStatus}<br>
+                                • Connection: ${this.connectionStatus}<br><br>
+                                <strong>💎 Most advanced Hypertokens explorer available!</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('pagination').style.display = 'none';
+            }
+
+            // === NOUVELLE MÉTHODE showTokenDetails() AVEC MODAL ===
+            showTokenDetails(ticker) {
+                const token = this.allTokens.find(t => t.tick === ticker);
+                if (!token) {
+                    console.error(`Token ${ticker} not found`);
+                    this.showNotification(`Token ${ticker} not found`, 'error');
+                    return;
+                }
+
+                // Calculer les données
+                const progress = Math.min(100, Math.max(0, token.progress || 0));
+                const remaining = parseInt(token.max) - parseInt(token.minted || 0);
+                
+                // Déterminer le statut et les badges
+                let badges = [];
+                let status = 'Active';
+                
+                if (token.isCompleted) {
+                    badges.push('<span class="modal-badge badge-completed">COMPLETED</span>');
+                    status = 'Completed';
+                } else if (progress > 50) {
+                    badges.push('<span class="modal-badge badge-live">LIVE MINTING</span>');
+                    if (progress > 75) {
+                        badges.push('<span class="modal-badge badge-hot">🔥 HOT</span>');
+                    }
+                } else if (progress > 0) {
+                    badges.push('<span class="modal-badge badge-live">MINTING</span>');
+                }
+
+                // Remplir les données de la modal
+                document.getElementById('modalTokenTitle').textContent = token.tick.toUpperCase();
+                document.getElementById('modalBadges').innerHTML = badges.join('');
+                
+                // Progress
+                document.getElementById('modalProgressFill').style.width = progress + '%';
+                document.getElementById('modalProgressText').textContent = progress.toFixed(2) + '% Complete';
+                document.getElementById('modalProgressAmount').textContent = 
+                    `${this.formatNumber(token.minted || 0)} / ${this.formatNumber(token.max)} minted`;
+                
+                // Stats Overview
+                document.getElementById('modalTotalSupply').textContent = this.formatNumber(token.max);
+                document.getElementById('modalCirculating').textContent = this.formatNumber(token.minted || 0);
+                document.getElementById('modalRemaining').textContent = this.formatNumber(remaining);
+                document.getElementById('modalHolders').textContent = token.totalHolders || 0;
+                
+                // Deployment info
+                document.getElementById('modalDeployer').textContent = token.addr ? 
+                    (token.addr.length > 20 ? token.addr.substring(0, 20) + '...' : token.addr) : 'N/A';
+                document.getElementById('modalMintLimit').textContent = this.formatNumber(token.lim || '0');
+                document.getElementById('modalDecimals').textContent = token.dec || 18;
+                document.getElementById('modalLastUpdate').textContent = token.lastUpdate ? 
+                    new Date(token.lastUpdate).toLocaleTimeString() : 'N/A';
+                
+                // Technical tab
+                document.getElementById('modalTicker').textContent = token.tick;
+                document.getElementById('modalMaxSupply').textContent = this.formatNumber(token.max);
+                document.getElementById('modalCurrentSupply').textContent = this.formatNumber(token.minted || 0);
+                document.getElementById('modalProgressPercent').textContent = progress.toFixed(2) + '%';
+                document.getElementById('modalStatus').textContent = status;
+                document.getElementById('modalDiscovery').textContent = token.discoveredVia || 'Engine Scan';
+                
+                // Analytics tab
+                document.getElementById('modalCompletionRate').textContent = progress.toFixed(2) + '%';
+                document.getElementById('modalTotalHolders').textContent = token.totalHolders || 0;
+                
+                // Stocker les données du token pour la fonction copy
+                window.currentTokenData = token;
+                
+                // Afficher la modal
+                document.getElementById('tokenModal').classList.add('active');
+            }
+
+            formatNumber(num) {
+                if (!num || num === '0') return '0';
+
+                let number;
+                if (typeof num === 'string') {
+                    try {
+                        if (num.length > 15) {
+                            const bigNum = BigInt(num);
+                            if (bigNum > 1000000000n) {
+                                const billions = Number(bigNum / 1000000000n);
+                                return `${billions.toLocaleString()}B`;
+                            } else if (bigNum > 1000000n) {
+                                const millions = Number(bigNum / 1000000n);
+                                return `${millions.toLocaleString()}M`;
+                            } else {
+                                return Number(bigNum).toLocaleString();
+                            }
+                        } else {
+                            number = parseInt(num, 10);
+                        }
+                    } catch (e) {
+                        return num;
+                    }
+                } else {
+                    number = num;
+                }
+
+                if (isNaN(number)) return '0';
+
+                if (number > 1000000000) {
+                    return `${(number / 1000000000).toFixed(1)}B`;
+                } else if (number > 1000000) {
+                    return `${(number / 1000000).toFixed(1)}M`;
+                } else {
+                    return number.toLocaleString();
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+
+            async refresh() {
+                console.log('🔄 Manual refresh triggered...');
+
+                if (this.monitoringEngine && this.engineStatus === 'active') {
+                    try {
+                        await this.monitoringEngine.forceRefresh();
+                        await this.loadTokensFromEngine();
+                        this.finalizeLoading();
+                        this.showNotification('🔄 Data refreshed successfully!', 'success');
+                    } catch (error) {
+                        console.error('❌ Refresh failed:', error);
+                        this.showNotification('❌ Refresh failed: ' + error.message, 'error');
+                    }
+                } else {
+                    this.showNotification('⚠️ Engine not ready for refresh', 'warning');
+                }
+            }
+
+            startPeriodicUpdates() {
+                // Auto-refresh toutes les 2 minutes
+                setInterval(() => {
+                    if (document.visibilityState === 'visible' && this.engineStatus === 'active') {
+                        console.log('⏰ Auto-refresh...');
+                        this.refresh();
+                    }
+                }, 120000);
+            }
+        }
+
+        // ======================================
+        // INITIALISATION
+        // ======================================
+
+        let app;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🔧 DEBUG: DOM loaded event triggered');
+            console.log('🎯 DOM loaded - Starting HyperTracker...');
+
+            try {
+                console.log('🔧 DEBUG: About to create HyperTrackerApp...');
+                app = new HyperTrackerApp();
+                console.log('🔧 DEBUG: HyperTrackerApp created successfully:', app);
+                window.app = app;
+                console.log('🔧 DEBUG: window.app assigned successfully');
+
+                // === SETUP MODAL TABS ===
+                document.querySelectorAll('.modal-tab').forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        // Retirer active de tous les onglets
+                        document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(content => {
+                            content.classList.remove('active');
+                        });
+                        
+                        // Activer l'onglet cliqué
+                        this.classList.add('active');
+                        const tabName = this.dataset.tab;
+                        document.getElementById(tabName + 'Tab').classList.add('active');
+                    });
+                });
+
+                // Fermer modal en cliquant sur l'overlay
+                document.getElementById('tokenModal').addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeTokenModal();
+                    }
+                });
+
+                // Fermer modal avec la touche Escape
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        closeTokenModal();
+                    }
+                });
+
+            } catch (error) {
+                console.error('🚨 DEBUG: Error creating app:', error);
+                console.error('🚨 DEBUG: Error stack:', error.stack);
+            }
+        });
+
+        // Fonctions globales
+        window.refreshData = () => app?.refresh();
+        window.changePage = (direction) => app?.changePage(direction);
+
+        // === FONCTIONS GLOBALES MODAL ===
+        window.closeTokenModal = () => {
+            document.getElementById('tokenModal').classList.remove('active');
+        };
+
+        window.copyTokenInfo = () => {
+            if (window.currentTokenData) {
+                const token = window.currentTokenData;
+                const info = `Token: ${token.tick.toUpperCase()}
+Max Supply: ${app.formatNumber(token.max)}
+Minted: ${app.formatNumber(token.minted || 0)}
+Progress: ${token.progress.toFixed(2)}%
+Holders: ${token.totalHolders || 0}
+Mint Limit: ${app.formatNumber(token.lim)}
+Decimals: ${token.dec}
+Address: ${token.addr || 'N/A'}
+Status: ${token.isCompleted ? 'Completed' : 'Active'}
+
+Trac Network - HyperTracker`;
+                
+                navigator.clipboard.writeText(info).then(() => {
+                    app.showNotification('📋 Token info copied to clipboard!', 'success');
+                }).catch(() => {
+                    console.log('Failed to copy token info');
+                    app.showNotification('❌ Failed to copy token info', 'error');
+                });
+            }
+        };
+
+        console.log('✅ HyperTracker initialized successfully!');
+
+    </script>
+</body>
+
+</html>

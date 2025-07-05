@@ -1,0 +1,55 @@
+{
+  "name": "hypertracker",
+  "version": "2.0.0",
+  "main": "index.html",
+  "description": "HyperTracker - Advanced Trac Network Token Monitor with Real-time Analytics",
+  "pear": {
+    "name": "hypertracker",
+    "type": "desktop",
+    "gui": {
+      "backgroundColor": "#0a0a0a",
+      "height": "900",
+      "width": "1400"
+    },
+    "links": {
+      "website": "https://hypertracker.com",
+      "support": "https://hypertracker.com/support",
+      "docs": "https://hypertracker.com/docs"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "start": "pear run . --dev",
+    "dev": "pear run . --dev",
+    "build": "pear pack .",
+    "dist": "pear pack . --dist",
+    "test": "echo \"HyperTracker - Real-time monitoring engine test\" && node src/test.js"
+  },
+  "keywords": [
+    "hypertracker",
+    "trac",
+    "tokens",
+    "desktop",
+    "crypto",
+    "monitoring",
+    "analytics",
+    "real-time",
+    "holders",
+    "whale-detection"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "trac-msb": "^0.1.82",
+    "trac-peer": "^0.2.5"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/hypertracker"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/hypertracker/issues"
+  },
+  "homepage": "https://hypertracker.com"
+}
